@@ -5,7 +5,7 @@ const stats = new Stats();
 const contentWidth = 800;
 const contentHeight = 600;
 
-const condition = 1; // debbug on = 1 / off = 0
+const condition = 1; // debbug on=1 / off=0
 
 bindPage();
 
@@ -93,14 +93,15 @@ function drawWristPoint(wrist, ctx, i) {
     ctx.beginPath();
     ctx.arc(wrist.position.x, wrist.position.y, 3, 0, 2 * Math.PI);
 
-    if (wrist.score > 0.5) {
+    if (wrist.score > 0.5) {  // 精度が一定以上なら描写する
         ctx.fillStyle = "red";
     } else if (condition) {
         ctx.fillStyle = "blue";
     };
     if (condition) {
-        ctx.font = "30px cursive";
-        ctx.fillText(i, wrist.position.x, wrist.position.y);
+        ctx.font = "17px cursive";
+        let stringPosition = "(" + i + " , " + wrist.position.x.toFixed(0) + " , " + wrist.position.y.toFixed(0) + ")"
+        ctx.fillText(stringPosition, wrist.position.x - 40, wrist.position.y + 20); //座標情報を表示
     }
     ctx.fill();
 }
