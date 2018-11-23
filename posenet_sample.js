@@ -5,6 +5,8 @@ const stats = new Stats();
 const contentWidth = 800;
 const contentHeight = 600;
 
+const condition = 1; // debbug on = 1 / off = 0
+
 bindPage();
 
 async function bindPage() {
@@ -72,8 +74,11 @@ function detectPoseInRealTime(video, net) {
 
         poses.forEach(({ score, keypoints }) => {
             // keypoints[9]には左手、keypoints[10]には右手の予測結果が格納されている 
-            drawWristPoint(keypoints[9], ctx);
-            drawWristPoint(keypoints[10], ctx);
+            for (var i = 0; i < keypoints.length; i++) {
+                // drawWristPoint(keypoints[9], ctx);
+                // drawWristPoint(keypoint[10], ctx);
+                drawWristPoint(keypoints[i], ctx, i);
+            }
         });
 
         stats.end();
@@ -84,9 +89,18 @@ function detectPoseInRealTime(video, net) {
 }
 
 // 与えられたKeypointをcanvasに描画する
-function drawWristPoint(wrist, ctx) {
+function drawWristPoint(wrist, ctx, i) {
     ctx.beginPath();
     ctx.arc(wrist.position.x, wrist.position.y, 3, 0, 2 * Math.PI);
-    ctx.fillStyle = "pink";
+
+    if (wrist.score > 0.5) {
+        ctx.fillStyle = "red";
+    } else if (condition) {
+        ctx.fillStyle = "blue";
+    };
+    if (condition) {
+        ctx.font = "30px cursive";
+        ctx.fillText(i, wrist.position.x, wrist.position.y);
+    }
     ctx.fill();
 }
