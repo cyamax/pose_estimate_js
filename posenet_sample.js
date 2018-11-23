@@ -7,6 +7,10 @@ const contentHeight = 600;
 
 const condition = 1; // debbug on=1 / off=0
 
+
+
+
+
 bindPage();
 
 async function bindPage() {
@@ -51,6 +55,30 @@ async function setupCamera() {
     }
 }
 
+
+
+
+// ポーズの条件判定
+function poseEstimation(keypoints) {
+    let operation = "";
+    if (keypoints[10].position.y < keypoints[0].position.y) {
+        operation = "left";
+
+    }
+
+    (condition) ? console.log(operation) : "";
+
+    return operation
+};
+
+
+
+
+
+
+
+
+
 // 取得したストリームをestimateSinglePose()に渡して姿勢予測を実行
 // requestAnimationFrameによってフレームを再描画し続ける
 function detectPoseInRealTime(video, net) {
@@ -73,12 +101,10 @@ function detectPoseInRealTime(video, net) {
         ctx.restore();
 
         poses.forEach(({ score, keypoints }) => {
-            // keypoints[9]には左手、keypoints[10]には右手の予測結果が格納されている 
-            for (var i = 0; i < keypoints.length; i++) {
-                // drawWristPoint(keypoints[9], ctx);
-                // drawWristPoint(keypoint[10], ctx);
+            for (let i = 0; i < keypoints.length; i++) {
                 drawWristPoint(keypoints[i], ctx, i);
             }
+            poseEstimation(keypoints);
         });
 
         stats.end();
@@ -87,6 +113,8 @@ function detectPoseInRealTime(video, net) {
     }
     poseDetectionFrame();
 }
+
+
 
 // 与えられたKeypointをcanvasに描画する
 function drawWristPoint(wrist, ctx, i) {
