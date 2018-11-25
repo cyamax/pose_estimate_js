@@ -6,7 +6,7 @@ const contentWidth = 800;
 const contentHeight = 600;
 
 const condition = 1; // debbug on=1 / off=0
-
+const seido = 0.5; //判定のしきい値
 //
 var sendPose_bef = 0 // 前回の命令
 var sendPose_now = 0 // 今回の命令
@@ -66,48 +66,57 @@ async function setupCamera() {
 }
 
 
+function send_url() {
+
+}
 
 
 // ポーズの条件判定
 function poseEstimation(estimation_list) {
     let operation = "";
-    // if (keypoints[10].position.y < keypoints[0].position.y) {
-    //     operation = "left";
 
-    // }
-
-    try {
-        pos_0 = estimation_list[0] //鼻
-        pos_1 = estimation_list[1] //喉
-        pos_2 = estimation_list[5] //右肩
-        pos_3 = estimation_list[7] //右肘
-        pos_5 = estimation_list[5] //左肩
-        pos_6 = estimation_list[8] //左肘
-        goRight_MaxY = goLeft_MaxY = goForward_MinY = pos_1.y
-
-
-        if ((pos_3.y < goForward_MinY) && (pos_6.y < goForward_MinY)) {
-            sendPose_now = 1 //↑
-        } else if ((pos_6.x > pos_5.x) && (pos_2.x < pos_3.x)) {
-            sendPose_now = 2 //→
-        } else if ((pos_6.x < pos_5.x) && (pos_2.x > pos_3.x)) {
-            sendPose_now = 3 // ←
-        } else if (pos_3.y < 0) {
-            sendPose_now = 4 // ↓
-        } else if ((pos_6.x > pos_5.x) && (pos_2.x > pos_3.x)) {
-            sendPose_now = 5 // stop
-        } else {
-            sendPose_now = 99 // ポジション取れているけど該当しない
-        }
-    }
-    catch {
-        console.log(estimation_list)
-        sendPose_now = 100 // エラー
+    //scoreチェック。使用するポイントのスコアが一つでも低い場合、判定しない
+    for (let j of [0, 5, 6, 9, 10]) {  //数字は使うポジションの値
+        if (estimation_list[j].score < seido) {
+            (condition) ? console.log("値が不確定でbreak", j, estimation_list[j].score) : "";
+            return operation; //関数を抜ける
+        };
     };
+
+
+    let pos_0 = estimation_list[0].position //鼻
+    // let pos_1 = estimation_list[1] //
+    let pos_5 = estimation_list[5].position //右肩
+    let pos_6 = estimation_list[6].position //左肩
+    // let pos_7 = estimation_list[7] //右肘
+    // let pos_8 = estimation_list[8] //左肘
+    let pos_9 = estimation_list[9].position // 右手首
+    let pos_10 = estimation_list[10].position //左手首
+
+
+    if ((pos_9.y < pos_5.y) && (pos_10.y < pos_6.y)) {
+        sendPose_now = 1 //↑
+
+    } else if ((pos_9.y < pos_5.y) && (pos_10.x > pos_6.y)) {
+        sendPose_now = 2 //→
+
+    } else if ((pos_9.y > pos_5.y) && (pos_10.y < pos_6.y)) {
+        sendPose_now = 3 // ←
+
+    } else if (pos_0.y < 0) {
+        sendPose_now = 4 // ↓
+
+    } else if ((pos_9.y > pos_5.y) && (pos_10.y > pos_6.y)) {
+        sendPose_now = 5 // stop
+
+    } else {
+        sendPose_now = 99 // ポジション取れているけど該当しない
+    }
+
     // send_url()
 
 
-    (condition) ? console.log(sendPose_now) : "";
+    (condition) ? console.log(requestUrl_message[sendPose_now]) : "";
 
     return operation
 };
@@ -156,7 +165,7 @@ function drawWristPoint(wrist, ctx, i) {
     ctx.beginPath();
     ctx.arc(wrist.position.x, wrist.position.y, 3, 0, 2 * Math.PI);
 
-    if (wrist.score > 0.5) {  // 精度が一定以上なら描写する
+    if (wrist.score > seido) {  // 精度が一定以上なら描写する
         ctx.fillStyle = "red";
     } else if (condition) {
         ctx.fillStyle = "blue";
