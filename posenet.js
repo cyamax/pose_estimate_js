@@ -1,3 +1,4 @@
+//認識周り
 const imageScaleFactor = 0.2;
 const outputStride = 16;
 const flipHorizontal = false;
@@ -5,9 +6,10 @@ const stats = new Stats();
 const contentWidth = 800;
 const contentHeight = 600;
 
+//追記
+const request = new XMLHttpRequest();
 const condition = 1; // debbug on=1 / off=0
 const seido = 0.5; //判定のしきい値
-//
 var sendPose_bef = 0 // 前回の命令
 var sendPose_now = 0 // 今回の命令
 
@@ -67,7 +69,15 @@ async function setupCamera() {
 
 
 function send_url() {
+    if (sendPose_now == sendPose_bef) {
+        // console.log("同じだから送らない")
+    } else if (sendPose_now != sendPose_bef) {
+        console.log("送る", requestUrl_message[sendPose_now]);
+        sendPose_bef = sendPose_now;
 
+        request.open("GET", requestUrl[sendPose_now]);
+        request.send();
+    }
 }
 
 
@@ -113,10 +123,8 @@ function poseEstimation(estimation_list) {
         sendPose_now = 99 // ポジション取れているけど該当しない
     }
 
-    // send_url()
-
-
     (condition) ? console.log(requestUrl_message[sendPose_now]) : "";
+    send_url()
 
     return operation
 };
